@@ -1,4 +1,5 @@
 import os
+import logging
 
 import requests
 import redis
@@ -38,9 +39,14 @@ def event():
             backend = '{}:{}'.format(item['host'], item['ports'][0])
             r.lpush(frontend, backend)
 
+        n = len(items)
+        app.logger.debug('Updating {} backend(s) for {}'.format(n, frontend))
+
     return "OK"
 
 
 if __name__ == "__main__":
     debug = os.getenv('DEBUG', 'false').lower() == 'true'
-    app.run(debug=debug, host='0.0.0.0', port=5000)
+    app.logger.addHandler(logging.StreamHandler())
+    app.logger.setLevel(logging.DEBUG)
+    app.run(debug=debug, host='0.0.0.0', port=int(os.getenv('PORT', '5000')))
