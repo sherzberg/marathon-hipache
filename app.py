@@ -16,6 +16,11 @@ r = redis.StrictRedis(
 TEMPLATE = os.getenv('FRONTEND_TEMPLATE')
 
 
+@app.route("/status", methods=['GET'])
+def status():
+    return 'OK'
+
+
 @app.route("/event", methods=['POST'])
 def event():
     data = request.json
