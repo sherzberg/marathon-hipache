@@ -1,0 +1,8 @@
+*.pyc
+.git
+.gitignore
+.ropeproject
+.env
+.coverage
+fig.yml
+.dockerignore
