@@ -4,6 +4,7 @@ import logging
 import requests
 import redis
 
+import flask
 from flask import Flask, request
 app = Flask(__name__)
 
@@ -14,6 +15,37 @@ r = redis.StrictRedis(
 )
 
 TEMPLATE = os.getenv('FRONTEND_TEMPLATE')
+MARATHON_URL = 'http://localhost:8080'
+
+
+@app.route('/api/v1/info', methods=['GET'])
+def index():
+    response = {
+        'connection': {},
+        'frontends': {}
+    }
+    try:
+        r.ping()
+        response['connection']['redis'] = 'OK'
+    except Exception as e:
+        app.logger.exception(e)
+        response['connection']['redis'] = 'cant connect: ' + str(e)
+
+    try:
+        requests.get(MARATHON_URL + '/metrics')
+        requests.raise_for_status()
+        response['connection']['marathon'] = 'OK'
+    except Exception as e:
+        app.logger.exception(e)
+        response['connection']['marathon'] = 'cant connect: ' + str(e)
+
+    if response['connection']['redis'] == 'OK':
+        for frontend in r.keys():
+            response['frontends'][frontend] = []
+            for backend in r.lrange(frontend, 0, -1):
+                response['frontends'][frontend].append(backend)
+
+    return flask.jsonify(response)
 
 
 @app.route("/status", methods=['GET'])
@@ -28,9 +60,12 @@ def event():
     if data['eventType'] == 'deployment_step_success':
         app_id = data['currentStep']['actions'][0]['app']
 
-        response = requests.get('http://localhost:8080/v2/tasks')
+        response = requests.get(MARATHON_URL + '/v2/tasks')
 
-        items = filter(lambda x: x['appId'] == app_id, response.json()['tasks'])
+        def _filter(x):
+            return x['appId'] == app_id
+
+        items = filter(_filter, response.json()['tasks'])
 
         domain = TEMPLATE.format(app_id[1:])
         frontend = 'frontend:{}'.format(domain)
