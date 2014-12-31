@@ -39,7 +39,7 @@ def index():
         response['connection']['marathon'] = 'cant connect: ' + str(e)
 
     if response['connection']['redis'] == 'OK':
-        for frontend in r.keys():
+        for frontend in r.keys(pattern='frontend*'):
             response['frontends'][frontend] = []
             for backend in r.lrange(frontend, 0, -1):
                 response['frontends'][frontend].append(backend)
