@@ -32,8 +32,7 @@ def index():
         response['connection']['redis'] = 'cant connect: ' + str(e)
 
     try:
-        requests.get(MARATHON_URL + '/metrics')
-        requests.raise_for_status()
+        requests.get(MARATHON_URL + '/metrics').raise_for_status()
         response['connection']['marathon'] = 'OK'
     except Exception as e:
         app.logger.exception(e)
