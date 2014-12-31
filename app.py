@@ -28,9 +28,9 @@ def event():
     if data['eventType'] == 'deployment_step_success':
         app_id = data['currentStep']['actions'][0]['app']
 
-        r = requests.get('http://localhost:8080/v2/tasks')
+        response = requests.get('http://localhost:8080/v2/tasks')
 
-        items = filter(lambda x: x['appId'] == app_id, r.json()['tasks'])
+        items = filter(lambda x: x['appId'] == app_id, response.json()['tasks'])
 
         domain = TEMPLATE.format(app_id[1:])
         frontend = 'frontend:{}'.format(domain)
