@@ -41,7 +41,7 @@ def event():
 
         for item in items:
             # assumes one PORT per app
-            backend = '{}:{}'.format(item['host'], item['ports'][0])
+            backend = 'http://{}:{}'.format(item['host'], item['ports'][0])
             r.lpush(frontend, backend)
 
         n = len(items)
