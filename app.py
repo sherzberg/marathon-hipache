@@ -49,6 +49,9 @@ def index():
 
 @app.route("/status", methods=['GET'])
 def status():
+    # for now, just hit these and hope for the best ;)
+    r.ping()
+    requests.get(MARATHON_URL + '/metrics').raise_for_status()
     return 'OK'
 
 
