@@ -59,7 +59,7 @@ def status():
 def event():
     data = request.json
 
-    if data['eventType'] == 'deployment_step_success':
+    if data['eventType'] in ('status_update_event', 'deployment_step_success', ):
         app_id = data['currentStep']['actions'][0]['app']
 
         response = requests.get(MARATHON_URL + '/v2/tasks')
