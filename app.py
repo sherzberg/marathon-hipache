@@ -15,7 +15,7 @@ r = redis.StrictRedis(
 )
 
 TEMPLATE = os.getenv('FRONTEND_TEMPLATE')
-MARATHON_URL = 'http://localhost:8080'
+MARATHON_URL = os.getenv('MARATHON_URL', 'http://localhost:8080')
 
 
 @app.route('/api/v1/info', methods=['GET'])
@@ -55,12 +55,20 @@ def status():
     return 'OK'
 
 
+def _appid_from_event(event):
+    if 'appId' in event:
+        return event['appId']
+
+    else:
+        return event['currentStep']['actions'][0]['app']
+
+
 @app.route("/event", methods=['POST'])
 def event():
     data = request.json
 
     if data['eventType'] in ('status_update_event', 'deployment_step_success', ):
-        app_id = data['currentStep']['actions'][0]['app']
+        app_id = _appid_from_event(data)
 
         response = requests.get(MARATHON_URL + '/v2/tasks')
 
